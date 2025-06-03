@@ -2,14 +2,13 @@ const { User, Student } = require("../config/sequelize.config");
 
 exports.createUser = async (req, res) => {
   try {
-    const { name, role, email, class: className, age } = req?.body;
+    const { name, role, email, className, age } = req.body;
 
     const isExist = await User.findOne({ where: { email } });
-    console.log(typeof isExist, "dqadd");
     if (isExist) {
       return res
         .status(400)
-        .json({ success: false, message: "Email already exist" });
+        .json({ success: false, message: "Email already exists" });
     }
 
     const newUser = await User.create({ name, role, email });
@@ -23,7 +22,7 @@ exports.createUser = async (req, res) => {
     }
 
     res.status(200).json({
-      success: false,
+      success: true,
       message: "User created successfully",
       data: newUser,
     });
