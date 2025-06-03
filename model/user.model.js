@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
   class User extends Model {
-    static associations(models) {
+    static associate(models) {
       this.hasMany(models.Student, { foreignKey: "userId" });
     }
   }
@@ -23,7 +23,6 @@ module.exports = (sequelize) => {
 
       name: {
         type: DataTypes.STRING,
-        unique: true,
       },
 
       role: {
@@ -34,6 +33,7 @@ module.exports = (sequelize) => {
     {
       sequelize,
       modelName: "User",
+      tableName: "Users",
       timestamps: true,
     }
   );
