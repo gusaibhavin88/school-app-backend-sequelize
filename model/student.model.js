@@ -46,6 +46,16 @@ module.exports = (sequelize) => {
       modelName: "Student",
       tableName: "students",
       timestamps: true,
+      indexes: [
+        {
+          name: "idx_class",
+          fields: ["class"],
+        },
+        {
+          name: "idx_class_age",
+          fields: ["class", "age"],
+        },
+      ],
     }
   );
 

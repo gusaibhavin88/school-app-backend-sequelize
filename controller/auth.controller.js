@@ -1,5 +1,5 @@
-const { Op, where } = require("sequelize");
-const { User, Student } = require("../config/sequelize.config");
+const { Op } = require("sequelize");
+const { User, Student, Sequelize } = require("../config/sequelize.config");
 
 // Create User
 exports.createUser = async (req, res) => {
@@ -128,6 +128,27 @@ exports.deleteUser = async (req, res) => {
       success: true,
       message: "User deleted successfully",
       data: deleteUser.toJSON(),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Group  User by name
+exports.groupUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: [
+        "name",
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
+      ],
+      group: ["name"],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User group successfully",
+      data: users,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
