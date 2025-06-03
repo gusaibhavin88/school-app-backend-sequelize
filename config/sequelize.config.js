@@ -29,8 +29,8 @@ const db = {};
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.User = require("../model/user.model");
-db.Student = require("../model/student.model");
+db.User = require("../model/user.model")(sequelize);
+db.Student = require("../model/student.model")(sequelize);
 
 db.sequelize
   .sync({ alter: true })
