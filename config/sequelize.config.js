@@ -32,6 +32,12 @@ db.Sequelize = Sequelize;
 db.User = require("../model/user.model")(sequelize);
 db.Student = require("../model/student.model")(sequelize);
 
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
 db.sequelize
   .sync({ alter: true })
   .then(() => {

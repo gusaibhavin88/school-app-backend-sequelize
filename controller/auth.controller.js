@@ -13,7 +13,6 @@ exports.createUser = async (req, res) => {
     }
 
     const newUser = await User.create({ name, role, email });
-
     if (role === "student") {
       await Student.create({
         userId: newUser.id,
@@ -76,12 +75,11 @@ exports.listUser = async (req, res) => {
 
     const { count, rows } = await User.findAndCountAll({
       where: { ...searchObj, ...whereClause },
+      include: { model: Student, as: "student" },
       order: [[sortField, sortOrder]],
       limit,
       offset,
     });
-
-    console.log("wqqwwaf");
 
     res.status(200).json({
       success: true,

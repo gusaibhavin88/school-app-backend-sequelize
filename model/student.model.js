@@ -3,7 +3,12 @@ const { Model, DataTypes } = require("sequelize");
 module.exports = (sequelize) => {
   class Student extends Model {
     static associations(models) {
-      this.belongsTo(models.User, { foreignKey: "userId" });
+      this.belongsTo(models.User, {
+        foreignKey: "userId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+        as: "user",
+      });
     }
   }
   Student.init(
@@ -18,7 +23,7 @@ module.exports = (sequelize) => {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "Users",
+          model: "users",
           key: "id",
         },
       },
@@ -39,6 +44,7 @@ module.exports = (sequelize) => {
     {
       sequelize,
       modelName: "Student",
+      tableName: "students",
       timestamps: true,
     }
   );
