@@ -1,6 +1,7 @@
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { User, Student } = require("../config/sequelize.config");
 
+// Create User
 exports.createUser = async (req, res) => {
   try {
     const { name, role, email, className, age } = req.body;
@@ -31,6 +32,7 @@ exports.createUser = async (req, res) => {
   }
 };
 
+// List Users
 exports.listUser = async (req, res) => {
   try {
     console.log(req.query, " req.query; req.query;");
@@ -49,14 +51,12 @@ exports.listUser = async (req, res) => {
     limit = parseInt(limit);
 
     const offset = (page - 1) * limit;
-    console.log("aaaaaaaaaaaaaaaaaaa");
 
     const whereClause = {};
 
     if (role) {
       whereClause["role"] = role;
     }
-    console.log("aaaaaaaaaaaaaaaaaaa");
 
     const searchObj = {
       [Op.or]: [
@@ -64,27 +64,70 @@ exports.listUser = async (req, res) => {
         { email: { [Op.iLike]: `%${search}%` } },
       ],
     };
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaassssssssssssssss");
 
-    console.log("wqqwwf", {
-      where: { ...searchObj, ...whereClause },
-      order: [sortField, sortOrder],
-      limit,
-      offset,
-    });
+    const [rows, { count }] = await Promise.all([
+      User.findAll({
+        where: { ...searchObj, ...whereClause },
+        include: { model: Student, as: "student" },
+        order: [[sortField, sortOrder]],
+        limit,
+        offset,
+      }),
+      User.findAndCountAll({
+        where: { ...searchObj, ...whereClause },
+      }),
+    ]);
 
-    const { count, rows } = await User.findAndCountAll({
-      where: { ...searchObj, ...whereClause },
-      include: { model: Student, as: "student" },
-      order: [[sortField, sortOrder]],
-      limit,
-      offset,
-    });
+    const totalDocumentCount = Math.ceil(count / limit);
 
     res.status(200).json({
       success: true,
       message: "Student list fetched successfully",
-      data: rows,
+      data: { rows, totalDocumentCount, page },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Update User
+exports.updateUser = async (req, res) => {
+  try {
+    const { name, role, email, className, age, id } = req.body;
+    const updateUser = await User.findByPk(id);
+    const updateStudent = await Student.findOne({
+      where: { userId: updateUser?.id },
+    });
+
+    updateUser.name = name;
+    updateStudent.class = className;
+    updateStudent.age = age;
+    await updateUser.save();
+    await updateStudent.save();
+
+    const result = { ...updateUser.toJSON(), ...updateStudent.toJSON() };
+
+    res.status(200).json({
+      success: true,
+      message: "User update successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Delete User
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const deleteUser = await User.destroy({ where: { id: userId } });
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      data: deleteUser.toJSON(),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
