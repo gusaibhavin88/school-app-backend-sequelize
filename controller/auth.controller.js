@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, where, fn } = require("sequelize");
 const { User, Student, Sequelize } = require("../config/sequelize.config");
 
 // Create User
@@ -143,6 +143,11 @@ exports.groupUsers = async (req, res) => {
         [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
       ],
       group: ["name"],
+      having: Sequelize.where(
+        Sequelize.fn("COUNT", Sequelize.col("id")),
+        "<",
+        2
+      ),
     });
 
     res.status(200).json({
